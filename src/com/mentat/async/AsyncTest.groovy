@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Test
 
 class AsyncTest {
-	private range = (1..100)
+	private range = (1..20)
 	private AtomicInteger counter = new AtomicInteger()
 	@Test
 	void testSlow() {
@@ -26,7 +26,7 @@ class AsyncTest {
 
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
-		println 'total ' + counter.value
+		assertEquals range.size(), counter.value
 	}
 	
 	@Test
@@ -42,7 +42,7 @@ class AsyncTest {
 		}
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
-		println 'total ' + counter.value
+		assertEquals range.size(), counter.value
 	}
 	
 	@Test
@@ -61,12 +61,12 @@ class AsyncTest {
 		}
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
-		println 'total ' + counter.value
+		assertEquals range.size(), counter.value
 	}
 	
 	@Test
-	void testAsyncFun() {
-		println '\n--testAsyncFun--\n'
+	void testAsyncFunFull() {
+		println '\n--testAsyncFunFull--\n'
 		def seeds = ['bootstrap1', 'foundation2', 'angular3']
 		long start = System.currentTimeMillis()
 		withPool {
@@ -79,7 +79,25 @@ class AsyncTest {
 		}
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
-		println 'total ' + counter.value
+		assertEquals range.size(), counter.value
+	}
+	
+	@Test
+	void testAsyncFunPartial() {
+		println '\n--testAsyncFunPartial--\n'
+		def seeds = ['bootstrap1', 'foundation2', 'angular3']
+		long start = System.currentTimeMillis()
+		withPool {
+			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
+			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
+			range.each {
+				Promise promise = fastConcatPartial(it)
+				promise.whenBound {counter.incrementAndGet()}
+			}
+		}
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
+		assertEquals range.size(), counter.value
 	}
 	
 	@Test
@@ -101,7 +119,7 @@ class AsyncTest {
 		}
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
-		println 'total ' + counter.value
+		assertEquals range.size(), counter.value
 	}
 	
 	@AsyncFun
@@ -123,6 +141,12 @@ class AsyncTest {
 	protected fun(s) {
 		sleep 20
 		slow('concatted ' + s)
+	}
+	
+	@AsyncFun
+	Closure fastConcatPartial = {
+		sleep 20
+		slow('concatted ' + it)
 	}
 	
 	@AsyncFun
