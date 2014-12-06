@@ -14,58 +14,70 @@ class AsyncTest {
 	@Test
 	void testSlow() {
 		def seeds = ['snail1', 'turtle2', 'sloth3']
-		println 'testSlow'
+		println '\ntestSlow\n'
+		long start = System.currentTimeMillis()
 		withPool {
-			seeds.eachParallel {
-				println slow(it)
+			(0..50_000).eachParallel {
+				slow(it as String)
 			}
 		}
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
 	}
 	
 	@Test
 	void testCallAsync() {
-		println 'testCallAsync'
+		println '\ntestCallAsync\n'
 		def seeds = ['groovy1', 'scala2', 'ruby3']
+		long start = System.currentTimeMillis()
 		withPool {
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
-			seeds.each {
-				Future future = slow.callAsync(it)
-				println future.get()
+			(0..50_000).each {
+				Future future = slow.callAsync(it as String)
+				future.get()
 			}
 		}
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
 	}
 	
 	@Test
 	void testAsyncFun() {
-		println 'testAsyncFun'
+		println '\ntestAsyncFun\n'
 		def seeds = ['bootstrap1', 'foundation2', 'angular3']
+		long start = System.currentTimeMillis()
 		withPool {
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
-			seeds.each {
-				Promise promise = fast(it)
-				promise.whenBound {println it}
+			(0..50_000).each {
+				Promise promise = fast(it as String)
+				promise.whenBound {}
 			}
 		}
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
 	}
 	
 	@Test
 	void testAsyncMethod() {
-		println 'testAsyncMethod'
+		println '\ntestAsyncMethod\n'
 		def seeds = ['google1', 'apple2', 'yahoo3']
+		long start = System.currentTimeMillis()
 		withPool {
+			Closure fun = this.&fun.asyncFun()
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
-			seeds.each {
+			(0..50_000).each {
 				/**
 				 * making a method asynchronous
 				 */
-				Closure fun = this.&fun.asyncFun()
-				Promise funPromise = fun(it)
-				funPromise.whenBound {println it}
+				Promise funPromise = fun(it as String)
+				funPromise.whenBound {}
 			}
 		}
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
 	}
 	
 	@AsyncFun
