@@ -13,11 +13,26 @@ import org.junit.Test
 class AsyncTest {
 	private range = (1..100)
 	private AtomicInteger counter = new AtomicInteger()
-
 	@Test
 	void testSlow() {
 		def seeds = ['snail1', 'turtle2', 'sloth3']
 		println '\n--testSlow--\n'
+		long start = System.currentTimeMillis()
+
+		range.each {
+			concat(it)
+			counter.incrementAndGet()
+		}
+
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
+		println 'total ' + counter.value
+	}
+	
+	@Test
+	void testParallel() {
+		def seeds = ['snail1', 'turtle2', 'sloth3']
+		println '\n--testParallel--\n'
 		long start = System.currentTimeMillis()
 		withPool {
 			range.eachParallel {
@@ -80,7 +95,7 @@ class AsyncTest {
 				/**
 				 * making a method asynchronous
 				 */
-				Promise funPromise = fun(it as String)
+				Promise funPromise = fun(it)
 				funPromise.whenBound {counter.incrementAndGet()}
 			}
 		}
@@ -105,9 +120,9 @@ class AsyncTest {
 	 * @param s
 	 * @return
 	 */
-	protected fun(String s) {
+	protected fun(s) {
 		sleep 20
-		slow(s)
+		slow('concatted ' + s)
 	}
 	
 	@AsyncFun
