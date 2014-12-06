@@ -3,6 +3,9 @@ package com.mentat.async;
 import static groovyx.gpars.GParsPool.withPool
 import static org.junit.Assert.*
 import groovyx.gpars.AsyncFun
+import groovyx.gpars.dataflow.Promise
+
+import java.util.concurrent.Future
 
 import org.junit.Test
 
@@ -11,18 +14,27 @@ class AsyncTest {
 	@Test
 	public void test() {
 		withPool {
-			println slow.callAsync('abc')
-			println fast('xyz')
-			println fun('123')*.callAsync()
+			println slow('abc')
+			Future future = slow.callAsync('.-.')
+			println future.get()
+			Promise promise = fast('xyz')
+			promise.whenBound {println it}
+			
+			/**
+			 * making a method asynchronous
+			 */
+			Closure fun = this.&fun.asyncFun()
+			Promise funPromise = fun('123')
+			funPromise.whenBound {println it}
 		}
 	}
 	
 	@AsyncFun
-	Closure fast = {slow}
+	Closure fast = {slow(it)}
 
 	
 	Closure slow = { a ->
-		println a
+		return a.toUpperCase()
 	}
 	
 	/**
@@ -33,6 +45,6 @@ class AsyncTest {
 	 * @return
 	 */
 	protected fun(String s) {
-		slow.call(s)
+		slow(s)
 	}
 }
