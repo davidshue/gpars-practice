@@ -1,14 +1,26 @@
 package com.mentat.async;
 
-import static org.junit.Assert.*;
+import static groovyx.gpars.GParsPool.withPool
+import static org.junit.Assert.*
+import groovyx.gpars.AsyncFun
 
-import org.junit.Test;
+import org.junit.Test
 
 class AsyncTest {
 
 	@Test
 	public void test() {
-		fail("Not yet implemented");
+		withPool {
+			println slow.callAsync('abc')
+			println fast('xyz')
+		}
 	}
+	
+	@AsyncFun
+	Closure fast = {slow}
 
+	
+	Closure slow = { a ->
+		println a
+	}
 }
