@@ -30,7 +30,7 @@ class AsyncTest {
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
 			seeds.each {
-				Future future = slow.callAsync(it as String)
+				Future future = slow.callAsync(it)
 				println future.get()
 			}
 		}
