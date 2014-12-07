@@ -70,6 +70,7 @@ class AsyncTest {
 		def seeds = ['bootstrap1', 'foundation2', 'angular3']
 		long start = System.currentTimeMillis()
 		withPool {
+			//range.makeConcurrent()
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
 			range.each {
