@@ -2,6 +2,7 @@ package com.mentat.async;
 
 import static groovyx.gpars.GParsPool.withPool
 import static org.junit.Assert.*
+import groovy.lang.Closure;
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -10,7 +11,7 @@ import org.junit.Test
 class AsyncFunTest {
 
 	@Test
-	public void testAsyncFun() {
+	void testAsyncFun() {
 		withPool() {
 			Closure plus = {
 				Integer a, Integer b ->
@@ -61,6 +62,57 @@ class AsyncFunTest {
 			//println "Distance = " + distincePromise.get() + ' m'
 			//println "ChattyDistance = " + chattyDistance(100, 20, measureTime()).get() + ' m'
 		}
+	}
+	
+	@Test
+	void testMyAsyncFun() {
+		long start = System.currentTimeMillis()
+		withPool() {
+			Closure upper = {
+				sleep 20
+				return it.toUpperCase()
+			}
+			
+			Closure fastConcat = {
+				sleep 30
+				upper('concatted ' + it)
+			}.asyncFun()
+			AtomicInteger counter = new AtomicInteger()
+			(1..100).each {  
+				fastConcat(it).whenBound {
+					counter.incrementAndGet()
+					println it
+				}
+			}
+			
+			while(counter.get() != 100) {
+				sleep 10
+			}
+		}
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
+	}
+	
+	@Test
+	void testMyAsyncFun2() {
+		long start = System.currentTimeMillis()
+		withPool() {
+			Closure upper = {
+				sleep 20
+				return it.toUpperCase()
+			}
+			
+			Closure fastConcat = {
+				sleep 30
+				upper('concatted ' + it)
+			}
+			AtomicInteger counter = new AtomicInteger()
+			(1..100).eachParallel {
+				println fastConcat(it)
+			}
+		}
+		long end = System.currentTimeMillis()
+		println 'took ' + (end-start) + ' ms'
 	}
 
 }

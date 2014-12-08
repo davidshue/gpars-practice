@@ -20,7 +20,7 @@ class AsyncTest {
 		long start = System.currentTimeMillis()
 
 		range.each {
-			concat(it)
+			println concat(it)
 			counter.incrementAndGet()
 		}
 
@@ -36,7 +36,7 @@ class AsyncTest {
 		long start = System.currentTimeMillis()
 		withPool {
 			range.eachParallel {
-				concat(it)
+				println concat(it)
 				counter.incrementAndGet()
 			}
 		}
@@ -55,7 +55,7 @@ class AsyncTest {
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
 			range.each {
 				Future future = concat.callAsync(it)
-				future.get()
+				println future.get()
 				counter.incrementAndGet()
 			}
 		}
@@ -72,20 +72,22 @@ class AsyncTest {
 		withPool {
 			Closure fast = slow.asyncFun()
 			
-			Closure fastConcat = {
+			Closure concat = {
 				sleep 20
-				fast('concatted ' + it)
+				'concatted ' + it
 			}.asyncFun()
-			
 			
 			//range.makeConcurrent()
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
-			range.each {
-				Promise promise = fastConcat(it)
-				println promise.get()
-				//promise.whenBound {counter.incrementAndGet(); println it}
+			range.eachParallel {
+				Promise promise = fast(concat(it))
+				promise.whenBound {println it; counter.incrementAndGet()}
 			}
+		}
+		while(counter.get() != range.size()) {
+			println 'counter ' + counter.get()
+			sleep 10
 		}
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
@@ -98,12 +100,19 @@ class AsyncTest {
 		def seeds = ['bootstrap1', 'foundation2', 'angular3']
 		long start = System.currentTimeMillis()
 		withPool {
+			Closure fastConcatPartial = {
+				sleep 20
+				slow('concatted ' + it)
+			}.asyncFun()
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
 			range.each {
 				Promise promise = fastConcatPartial(it)
-				promise.whenBound {counter.incrementAndGet()}
+				promise.whenBound {counter.incrementAndGet(); println it}
 			}
+		}
+		while(counter.get() != range.size()) {
+			sleep 10
 		}
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
@@ -124,8 +133,11 @@ class AsyncTest {
 				 * making a method asynchronous
 				 */
 				Promise funPromise = fun(it)
-				funPromise.whenBound {counter.incrementAndGet()}
+				funPromise.whenBound {counter.incrementAndGet(); println it}
 			}
+		}
+		while(counter.get() != range.size()) {
+			sleep 10
 		}
 		long end = System.currentTimeMillis()
 		println 'took ' + (end-start) + ' ms'
@@ -153,11 +165,7 @@ class AsyncTest {
 		slow('concatted ' + s)
 	}
 	
-	@AsyncFun
-	Closure fastConcatPartial = {
-		sleep 20
-		slow('concatted ' + it)
-	}
+
 	
 
 	
