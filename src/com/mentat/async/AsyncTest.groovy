@@ -70,12 +70,21 @@ class AsyncTest {
 		def seeds = ['bootstrap1', 'foundation2', 'angular3']
 		long start = System.currentTimeMillis()
 		withPool {
+			Closure fast = slow.asyncFun()
+			
+			Closure fastConcat = {
+				sleep 20
+				fast('concatted ' + it)
+			}.asyncFun()
+			
+			
 			//range.makeConcurrent()
 			// Here you need to use each, not eachParallel. Conventional wisdom here is that since you are calling
 			// it async, it returns right away, so no need to eachParallel. If you do, it will throw exceptions here
 			range.each {
 				Promise promise = fastConcat(it)
-				promise.whenBound {counter.incrementAndGet()}
+				println promise.get()
+				//promise.whenBound {counter.incrementAndGet(); println it}
 			}
 		}
 		long end = System.currentTimeMillis()
@@ -123,8 +132,8 @@ class AsyncTest {
 		assertEquals range.size(), counter.value
 	}
 	
-	@AsyncFun
-	Closure fast = {slow(it)}
+	//@AsyncFun
+	//Closure fast = slow
 
 	
 	Closure slow = { a ->
@@ -150,11 +159,7 @@ class AsyncTest {
 		slow('concatted ' + it)
 	}
 	
-	@AsyncFun
-	Closure fastConcat = {
-		sleep 20
-		fast('concatted ' + it)
-	}
+
 	
 	Closure concat = {
 		sleep 20
