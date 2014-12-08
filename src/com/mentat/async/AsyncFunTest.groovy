@@ -12,6 +12,7 @@ class AsyncFunTest {
 
 	@Test
 	void testAsyncFun() {
+		long start = System.currentTimeMillis()
 		withPool() {
 			Closure plus = {
 				Integer a, Integer b ->
@@ -27,8 +28,6 @@ class AsyncFunTest {
 			}.asyncFun()
 
 			Closure measureTime = {
-
-				->
 				sleep 3000
 				4
 			}.asyncFun()
@@ -56,8 +55,10 @@ class AsyncFunTest {
 			}
 			
 			while(counter.get() != 10) {
-				sleep 1000
+				sleep 100
 			}
+			long end = System.currentTimeMillis()
+			println 'took ' + (end-start) + ' ms'
 
 			//println "Distance = " + distincePromise.get() + ' m'
 			//println "ChattyDistance = " + chattyDistance(100, 20, measureTime()).get() + ' m'
