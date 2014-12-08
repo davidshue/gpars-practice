@@ -47,7 +47,7 @@ class AsyncFunTest {
 			}.asyncFun()
 			
 			AtomicInteger counter = new AtomicInteger()
-			(1..10).eachParallel {  
+			(1..10).eachParallel {
 				distance(100, it, measureTime()).whenBound {
 					counter.incrementAndGet()
 					println it
