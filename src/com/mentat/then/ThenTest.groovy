@@ -61,13 +61,13 @@ class ThenTest {
 
 	
 	Closure readStep = {
-		int sleepTime = new Random().nextInt(1801) + 200 // between 00ms and 2000ms
+		int sleepTime = new Random().nextInt(1801) + 200 // between 200ms and 2000ms
 		sleep sleepTime
 		return it.toUpperCase()
 	}
 	
 	Closure writeStep = {
-		int sleepTime = new Random().nextInt(5001) + 1000 // between 1 second and 6 seconds
+		int sleepTime = new Random().nextInt(10001) + 1000 // between 1 second and 11 seconds
 		sleep sleepTime
 		return 'Concatted ' + it
 	}

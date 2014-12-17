@@ -9,12 +9,13 @@ class PeekingActor extends DefaultActor {
 	int readCount = 0
 	int writeCount = 0
 	boolean failure = false
+	int maxDiscrepancy = 0
 	
 	private long startTime
 	private long endTime
 	
 	int getReadWriteDiscrepancy() {
-		writeCount - readCount
+		readCount - writeCount
 	}
 
 	@Override
@@ -44,7 +45,7 @@ class PeekingActor extends DefaultActor {
 						break
 					default: break
 				}
-				
+				if (readWriteDiscrepancy > maxDiscrepancy) maxDiscrepancy = readWriteDiscrepancy
 			}
 		}
 	}
