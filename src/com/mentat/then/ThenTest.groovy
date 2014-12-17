@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Test
 
 class ThenTest {
-	private range = (1..2000)
+	private range = (1..20000)
 
 	@Test
 	void testReadWrite() {
@@ -61,13 +61,13 @@ class ThenTest {
 
 	
 	Closure readStep = {
-		int sleepTime = new Random().nextInt(1801) + 200 // between 200ms and 2000ms
+		int sleepTime = new Random().nextInt(181) + 20 // between 20ms and 200ms
 		sleep sleepTime
 		return it.toUpperCase()
 	}
 	
 	Closure writeStep = {
-		int sleepTime = new Random().nextInt(10001) + 1000 // between 1 second and 11 seconds
+		int sleepTime = new Random().nextInt(1001) + 100 // between 100ms and 1100 ms
 		sleep sleepTime
 		return 'Concatted ' + it
 	}
