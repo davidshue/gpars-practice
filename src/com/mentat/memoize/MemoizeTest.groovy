@@ -11,9 +11,7 @@ class MemoizeTest {
 	@Test
 	void test() {
 		withPool {
-			Closure nameFetcher = {
-					getName(it)
-			}.gmemoize()
+			Closure nameFetcher = this.&getName.gmemoize()
 			
 			println nameFetcher(1)
 			println nameFetcher(1)
